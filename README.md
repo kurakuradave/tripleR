@@ -1,4 +1,4 @@
-#TripleR
+# TripleR
 
 A simple R6 class for running paralel R jobs by making use of Docker containers.
 
