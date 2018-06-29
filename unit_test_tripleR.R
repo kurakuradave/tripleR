@@ -149,15 +149,6 @@ dim(resINCOMPLETE[[2]])
 
 ### test generate random numbers
 ### see dockerRunif.R
-myScript <- "dockerRunif.R"
-inFile <- "thisData.rds"
-jobs <- list( c("101", "50", "100"),
-              c("101", "0.5", "1" ),
-              c("101", "3", "7")
-             )
-myDockerArgs <- lapply(jobs, function(x){
-                    c(x, inFile, rrr$makeOutFile( myScript, myInFile, unlist(x) ) )
-                })
 res <- rrr$runEach( myScript, myDockerArgs )
 
 
