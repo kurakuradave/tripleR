@@ -13,8 +13,8 @@ tripleR_factory <- R6Class(
 
     private = list(
         
-        ..timeout_mins = 30,
-        ..check_secs = 30,
+        ..timeoutMins = 30,
+        ..checkSecs = 30,
         ..dockerAccount = "",
         ..dockerRepository = "",
         ..dockerTag = "",
@@ -34,6 +34,7 @@ tripleR_factory <- R6Class(
         ..splitInFiles = NULL,
         ..splitNArgs = NULL,
         ..dockerArgs = NULL,
+        ..autoBindResults = FALSE,
         
         createTempDir = function(){
             if( !(private$..tempDir %in% list.files() ) ){
@@ -97,7 +98,7 @@ tripleR_factory <- R6Class(
             ### check for timeout
             private$..elapsed <- now() - private$..jobsStartTime
             dispElapsed <- round(as.numeric(as.duration(private$..elapsed)), 4)
-            dispTimeout <- private$..timeout_mins*60
+            dispTimeout <- private$..timeoutMins*60
 
             message(paste("elapsed :", dispElapsed, "time out :", dispTimeout ))
            if( dispElapsed> dispTimeout ){
@@ -160,20 +161,23 @@ tripleR_factory <- R6Class(
         checkTilDone = function(){
             ret = NULL
             while( !(private$..hasTimedOut | private$..jobsCompleted ) ) {
-                Sys.sleep( private$..check_secs)                
+                Sys.sleep( private$..checkSecs)                
                 private$checkJobsStatus()                
             }
             status <- private$statusNow()
 
             ### combine completed files
             private$..completedFiles <- private$tabulateCompletedFiles()
-            result <- lapply(private$..completedFiles, function(x){
+            results <- lapply(private$..completedFiles, function(x){
                 readRDS(paste0(private$..tempDir, "/", x))
             })
-            result <- do.call( "rbind", result )
+            
+            if( private$..autoBindResults ){
+                results <- do.call( "rbind", result )
+            }
 
             ## wrap final returned object
-            ret <- list(status, result)
+            ret <- list(status, results)
 
             private$displaySummaryMsg()
             
@@ -298,14 +302,14 @@ tripleR_factory <- R6Class(
                                dockerAccount,
                                dockerRepository,
                                dockerTag,
-                               timeout_mins = 30,
-                               check_secs = 30,
+                               timeoutMins = 30,
+                               checkSecs = 30,
                                maxContainers = 20,
-                               autoCleanup = FALSE
-                              
+                               autoCleanup = FALSE,
+                               autoBindResults = FALSE,
         ){
-            private$..timeout_mins <- timeout_mins
-            private$..check_secs <- check_secs
+            private$..timeoutMins <- timeoutMins
+            private$..checkSecs <- checkSecs
             private$..dockerAccount <- dockerAccount
             private$..dockerRepository <- dockerRepository
             private$..dockerTag <- dockerTag
@@ -316,23 +320,23 @@ tripleR_factory <- R6Class(
     
     active = list(
         
-        timeout_mins = function( value ){
+        timeoutMins = function( value ){
             if(missing(value)) {
-                private$..timeout_mins                
+                private$..timeoutMins                
             } else {
                 assert_is_a_number( value )
                 assert_all_are_in_closed_range(value, 2, 1000)
-                private$..timeout_mins <- value
+                private$..timeoutMins <- value
             }            
         },
 
-        check_secs = function( value ){
+        checkSecs = function( value ){
             if(missing(value)){
-                private$..check_secs
+                private$..checkSecs
             } else{
                 assert_is_a_number(value)
                 asser_all_are_greater_than( 5 )
-                private$..check_secs <- value
+                private$..checkSecs <- value
             }
         },
         
@@ -386,13 +390,13 @@ tripleR_factory <- R6Class(
             }
         },
 
-        max_containers = function( value ){
+        maxContainers = function( value ){
             if(missing(value)){
-                private$..max_containers
+                private$..maxContainers
             } else{
                 assert_is_a_number(value)
                 asser_all_are_in_closed_range(value, 2, 100)
-                private$..max_containers <- value
+                private$..maxContainers <- value
             }
         },
 
@@ -402,6 +406,15 @@ tripleR_factory <- R6Class(
             } else {
                 assert_all_are_logical_strings( value )
                 private$..autoCleanup <- value
+            }
+        },
+        
+        autoBindResults = function( value ){
+            if( missing(value) ){
+                private$..autoBindResults
+            } else {
+                assert_all_are_logical_strings( value )
+                private$..autoBindResults <- value
             }
         }
     )   

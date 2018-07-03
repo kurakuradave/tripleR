@@ -17,7 +17,7 @@ if( "rrr" %in% ls() ){
 
 
 ### create new test object
-rrr <- RRR("kurakuradave", "rarazon", "0.01", timeout_mins=1, check_secs=10)
+rrr <- RRR("kurakuradave", "rarazon", "0.01", timeoutMins=1, checkSecs=10, autoBindResults=TRUE)
 "TripleR" %in% class( rrr )
 
 
