@@ -173,7 +173,7 @@ tripleR_factory <- R6Class(
             })
             
             if( private$..autoBindResults ){
-                results <- do.call( "rbind", result )
+                results <- do.call( "rbind", results )
             }
 
             ## wrap final returned object
@@ -306,7 +306,7 @@ tripleR_factory <- R6Class(
                                checkSecs = 30,
                                maxContainers = 20,
                                autoCleanup = FALSE,
-                               autoBindResults = FALSE,
+                               autoBindResults = FALSE
         ){
             private$..timeoutMins <- timeoutMins
             private$..checkSecs <- checkSecs
@@ -315,6 +315,7 @@ tripleR_factory <- R6Class(
             private$..dockerTag <- dockerTag
             private$..maxContainers <- maxContainers
             private$..autoCleanup <- autoCleanup
+            private$..autoBindResults <- autoBindResults
         }        
     ),
     

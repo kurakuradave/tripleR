@@ -152,3 +152,22 @@ dim(resINCOMPLETE[[2]])
 res <- rrr$runEach( myScript, myDockerArgs )
 
 
+
+
+##### testing for autoBindResults = FALSE
+rrr$autoBindResults <- FALSE
+### test runEach successful completion, combine all completed files
+a <- mtcars[1:10,]
+b <- mtcars[11:20,]
+c <- mtcars[21:30,]
+rrr$mkdirTemp()
+saveRDS(a, './rrrTemp/thisData.rds_thisScript.R_v1_v2_v3.rds')
+saveRDS(b, './rrrTemp/thisData.rds_thisScript.R_v4_v2_v3.rds')
+saveRDS(c, './rrrTemp/thisData.rds_thisScript.R_v5_v2_v3.rds')
+resSUCCESS <- rrr$runEach( myScript, myDockerArgs )
+print(resSUCCESS[[1]])
+see <- resSUCCESS[[2]]
+class( see ) == "list"
+library(dplyr)
+ress <- bind_rows( see )
+sum(mtcars[1:30,1] - ress[,1]) == 0
